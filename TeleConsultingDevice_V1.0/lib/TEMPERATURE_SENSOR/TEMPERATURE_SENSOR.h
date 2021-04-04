@@ -7,11 +7,13 @@
 
 class TEMPERATURE_SENSOR {
     Adafruit_MLX90614 MLX;
-    static const int LED_PIN = 27;
+    int LED_PIN;
     float AMB_TEMP[10];
     float OBJ_TEMP[10];
 
   public:
+    TEMPERATURE_SENSOR(int led_pin); 
+
     void begin();
 
     void read();

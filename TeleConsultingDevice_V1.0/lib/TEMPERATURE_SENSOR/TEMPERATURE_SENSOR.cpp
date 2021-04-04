@@ -1,5 +1,9 @@
 #include "TEMPERATURE_SENSOR.h"
 
+ TEMPERATURE_SENSOR::TEMPERATURE_SENSOR(int led_pin){
+    LED_PIN = led_pin;
+}
+
 void TEMPERATURE_SENSOR::begin()
 {
     MLX.begin();

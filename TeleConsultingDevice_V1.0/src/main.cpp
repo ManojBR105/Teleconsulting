@@ -26,7 +26,7 @@ extern "C"
 #define CS 15
 
 #define PUSH_BTN 32
-
+#define TEMP_LED 27
 enum deviceState
 {
   NOT_CONNECTED,
@@ -69,7 +69,7 @@ volatile bool done = false;
 volatile bool finished = false;
 
 I2S_MIC INMP441 = I2S_MIC(WS_PIN, SD_PIN, SCK_PIN, PORT, SAMPLE_RATE, SAMPLE_BITS);
-TEMPERATURE_SENSOR MLX90614;
+TEMPERATURE_SENSOR MLX90614 = TEMPERATURE_SENSOR(TEMP_LED);
 SPI_OLED SSD1306 = SPI_OLED(RES, DC, CS);
 PULSE_OXIMETER MY_SENSOR = PULSE_OXIMETER(pulseOximeterCallback);
 BluetoothSerial SerialBT;
