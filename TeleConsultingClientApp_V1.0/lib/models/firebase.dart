@@ -36,7 +36,7 @@ class Authenticate {
       User user = result.user;
 
       final DocumentReference myDoc =
-          FirebaseFirestore.instance.collection('patientdetails').doc(user.uid);
+          FirebaseFirestore.instance.collection('patients').doc(user.uid);
 
       await myDoc.set({"Name": username, "email": email});
 
@@ -75,7 +75,7 @@ class Authenticate {
 
 Future<Map> getUserDetails(MyUser user) async {
   final DocumentReference ref =
-      FirebaseFirestore.instance.collection('patientdetails').doc(user.uid);
+      FirebaseFirestore.instance.collection('patients').doc(user.uid);
   DocumentSnapshot snap = await ref.get();
   return snap.data();
 }
@@ -101,11 +101,13 @@ Future<void> uploadDataToFirebase(
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Uploading Temperature data ...")));
 
-      final DocumentReference tempRef = FirebaseFirestore.instance
-          .collection(user.uid)
+      final DocumentReference temperatureRef = FirebaseFirestore.instance
+          .collection('patients')
+          .doc(user.uid)
+          .collection('records')
           .doc(formattedDateTime);
 
-      await tempRef.set({
+      await temperatureRef.set({
         "Ambient Temperature": ambientTemperature.toString(),
         "Body Temperature": bodyTemperature.toString()
       });
@@ -131,9 +133,10 @@ Future<void> uploadDataToFirebase(
           final Task uploadHeart = heartRef.putFile(heartFile);
           uploadHeart.whenComplete(() async {
             if (uploadHeart.snapshot.state == TaskState.success) {
-              callbackAfterSuccess();
               ScaffoldMessenger.of(context)
                   .showSnackBar(SnackBar(content: Text("Upload Complete!!")));
+
+              callbackAfterSuccess();
             } else {
               print(uploadHeart.snapshot.state);
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(

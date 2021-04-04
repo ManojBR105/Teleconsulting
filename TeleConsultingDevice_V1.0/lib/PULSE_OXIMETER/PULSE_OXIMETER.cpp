@@ -1,6 +1,7 @@
 #include "PULSE_OXIMETER.h"
 
-PULSE_OXIMETER::PULSE_OXIMETER(void (*callbackfn)()){
+PULSE_OXIMETER::PULSE_OXIMETER(void (*callbackfn)())
+{
     pulseOximeterCallback = callbackfn;
 }
 
@@ -23,39 +24,40 @@ void PULSE_OXIMETER::reset()
     DONE = false;
 }
 
-bool  PULSE_OXIMETER::is_done()
+bool PULSE_OXIMETER::is_done()
 {
     return DONE;
 }
 
-uint16_t  PULSE_OXIMETER::getNUM_SAMPLES()
+uint16_t PULSE_OXIMETER::getNUM_SAMPLES()
 {
     return NUM_SAMPLES;
 }
 
-uint8_t * PULSE_OXIMETER::getWAVE()
+uint8_t *PULSE_OXIMETER::getWAVE()
 {
     return WAVE;
 }
 
-uint16_t * PULSE_OXIMETER::getBEAT_INT()
+uint16_t *PULSE_OXIMETER::getBEAT_INT()
 {
     return BEAT_INT;
 }
 
-void  PULSE_OXIMETER::get_record_data(uint16_t *bpm, uint16_t *n)
+void PULSE_OXIMETER::get_record_data(uint16_t *bpm, uint16_t *n)
 {
     *bpm = BPM;
     *n = N;
 }
 
-void  PULSE_OXIMETER::begin(int n_samples)
+void PULSE_OXIMETER::begin(int n_samples)
 {
     Serial.print("Initializing pulse oximeter..");
     if (!POX.begin())
     {
         Serial.println("FAILED");
-        while (1);
+        while (1)
+            ;
     }
     POX.setIRLedCurrent(MAX30100_LED_CURR_7_6MA);
     POX.setOnBeatDetectedCallback(pulseOximeterCallback);
@@ -77,7 +79,7 @@ void  PULSE_OXIMETER::begin(int n_samples)
     reset();
 }
 
-void  PULSE_OXIMETER::update()
+void PULSE_OXIMETER::update()
 {
     //Serial.print("Period: ");
     //Serial.println(micros() - LAST_UPDATE);
@@ -87,29 +89,36 @@ void  PULSE_OXIMETER::update()
     draw_wave();
 }
 
-void  PULSE_OXIMETER::sensor_update()
+void PULSE_OXIMETER::sensor_update()
 {
     SENSOR.update();
 }
 
-void  PULSE_OXIMETER::on_beat_detected()
+void PULSE_OXIMETER::on_beat_detected()
 {
     uint16_t IBI = POX.getHeartBeatInterval();
 
-    if ((COUNT > 5) && (300 < IBI && IBI < 2500))
+    if (COUNT > 5)
     {
-        BEAT_INT[N] = IBI;
-        BPM = 60000 / IBI;
-        SPO2 += POX.getSpO2();
-        N++;
-        if (N >= NUM_SAMPLES)
-            DONE = true;
+        if (400 < IBI && IBI < 1200)
+        {
+            BEAT_INT[N] = IBI;
+            BPM = 60000 / IBI;
+            SPO2 += POX.getSpO2();
+            N++;
+            if (N >= NUM_SAMPLES)
+                DONE = true;
+        }
+        else
+        {
+            COUNT = 0;
+        }
     }
     LAST_IBI = IBI;
     COUNT++;
 }
 
-void  PULSE_OXIMETER::draw_wave()
+void PULSE_OXIMETER::draw_wave()
 {
     uint16_t red, ir;
     if ((MAX_RED - MIN_RED) >= 500)
@@ -132,7 +141,7 @@ void  PULSE_OXIMETER::draw_wave()
     }
 }
 
-void  PULSE_OXIMETER::compute(float *avgIBI, float *avgBPM, float *RMSSD, float *SDNN, float *avgSPO2)
+void PULSE_OXIMETER::compute(float *avgIBI, float *avgBPM, float *RMSSD, float *SDNN, float *avgSPO2)
 {
     uint32_t sum = 0;
     uint32_t SDNNsum = 0;
@@ -153,7 +162,8 @@ void  PULSE_OXIMETER::compute(float *avgIBI, float *avgBPM, float *RMSSD, float 
     *avgSPO2 = SPO2 / NUM_SAMPLES;
 }
 
-void PULSE_OXIMETER::close(){
-      POX.shutdown();
-      SENSOR.shutdown();
-    }
+void PULSE_OXIMETER::close()
+{
+    POX.shutdown();
+    SENSOR.shutdown();
+}

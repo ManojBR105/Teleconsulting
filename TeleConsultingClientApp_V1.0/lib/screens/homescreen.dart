@@ -98,11 +98,13 @@ class _HomeScrnState extends State<HomeScrn> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        loading ? "Loading" : userData["Name"].toString(),
+                        loading ? "Username" : userData["Name"].toString(),
                         style: TextStyle(fontSize: 25.0, fontFamily: 'Rubik'),
                       ),
                       Text(
-                        loading ? "Loading" : userData["email"].toString(),
+                        loading
+                            ? "email@domain.com"
+                            : userData["email"].toString(),
                         style: TextStyle(
                             fontSize: 15.0,
                             color: Colors.grey[600],
