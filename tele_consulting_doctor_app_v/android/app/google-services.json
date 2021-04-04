@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "300565841291",
+    "project_id": "teleconsulting-devices",
+    "storage_bucket": "teleconsulting-devices.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:300565841291:android:494825af6040198fb3db8e",
+        "android_client_info": {
+          "package_name": "com.magicsmoke.teleconsulting_client"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "300565841291-nu5s097326pqi0f5d300j61e141i5u6m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAapCk_csBIlGmgWzjUQaboABaHvF1Ttug"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "300565841291-nu5s097326pqi0f5d300j61e141i5u6m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:300565841291:android:a69117a742e760aeb3db8e",
+        "android_client_info": {
+          "package_name": "com.magicsmoke.teleconsulting_doctor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "300565841291-nu5s097326pqi0f5d300j61e141i5u6m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAapCk_csBIlGmgWzjUQaboABaHvF1Ttug"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "300565841291-nu5s097326pqi0f5d300j61e141i5u6m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

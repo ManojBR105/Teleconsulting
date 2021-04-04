@@ -1,6 +1,5 @@
-import 'package:client_app/models/firebase.dart';
 import 'package:flutter/material.dart';
-import 'package:client_app/screens/recorderscreen.dart';
+import 'package:tele_consulting_doctor_app_v/models/firebase.dart';
 
 class HomeScrn extends StatefulWidget {
   final MyUser user;
@@ -31,45 +30,24 @@ class _HomeScrnState extends State<HomeScrn> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.lightBlue[50],
-        appBar: AppBar(
-          title: Text("Profile"),
-          backgroundColor: Colors.lightBlue[700],
-          actions: <Widget>[
-            TextButton.icon(
-                style: ButtonStyle(
-                    foregroundColor:
-                        MaterialStateProperty.all<Color>(Colors.white)),
-                onPressed: () async {
-                  await Authenticate().signOut();
-                },
-                icon: Icon(Icons.person),
-                label: Text("Logout"))
-          ],
-        ),
-        body: _userDetailsPage(),
-        floatingActionButton: TextButton.icon(
-          icon: Icon(
-            Icons.add_circle,
-            color: Colors.white,
-          ),
-          label: Text(
-            "Start New Recording",
-            style: TextStyle(
-                fontSize: 16.0,
-                letterSpacing: 1.2,
-                color: Colors.white,
-                fontFamily: 'OdibeeSans'),
-          ),
-          style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.redAccent[700]),
-              shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0)))),
-          onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => RecordScrn(user)));
-          },
-        ));
+      backgroundColor: Colors.lightBlue[50],
+      appBar: AppBar(
+        title: Text("Profile"),
+        backgroundColor: Colors.lightBlue[700],
+        actions: <Widget>[
+          TextButton.icon(
+              style: ButtonStyle(
+                  foregroundColor:
+                      MaterialStateProperty.all<Color>(Colors.white)),
+              onPressed: () async {
+                await Authenticate().signOut();
+              },
+              icon: Icon(Icons.person),
+              label: Text("Logout"))
+        ],
+      ),
+      body: _userDetailsPage(),
+    );
   }
 
   Widget _userDetailsPage() {
@@ -111,40 +89,6 @@ class _HomeScrnState extends State<HomeScrn> {
                             letterSpacing: 1.2),
                       ),
                       SizedBox(height: 10.0),
-                      Card(
-                        color: Colors.greenAccent[700],
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0)),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(5.0, 5.0, 5.0, 0.0),
-                              child: Text(
-                                "100.00",
-                                style: TextStyle(
-                                    // backgroundColor: Colors.greenAccent[700],
-                                    color: Colors.white,
-                                    fontSize: 30.0,
-                                    fontFamily: 'OdibeeSans'),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                "Health Score",
-                                style: TextStyle(
-                                    fontSize: 16.0,
-                                    letterSpacing: 1.2,
-                                    color: Colors.white,
-                                    fontFamily: 'OdibeeSans'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
                     ],
                   )
                 ],
@@ -163,7 +107,7 @@ class _HomeScrnState extends State<HomeScrn> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
                   child: Text(
-                    "Recordings",
+                    "Patients",
                     style:
                         TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
                   ),

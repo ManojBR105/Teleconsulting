@@ -36,7 +36,7 @@ class Authenticate {
       User user = result.user;
 
       final DocumentReference myDoc =
-          FirebaseFirestore.instance.collection('patients').doc(user.uid);
+          FirebaseFirestore.instance.collection('doctors').doc(user.uid);
 
       await myDoc.set({"name": username, "email": email});
 
@@ -75,7 +75,7 @@ class Authenticate {
 
 Future<Map> getUserDetails(MyUser user) async {
   final DocumentReference ref =
-      FirebaseFirestore.instance.collection('patients').doc(user.uid);
+      FirebaseFirestore.instance.collection('doctors').doc(user.uid);
   DocumentSnapshot snap = await ref.get();
   return snap.data();
 }
