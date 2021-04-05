@@ -25,8 +25,9 @@ extern "C"
 #define DC 2
 #define CS 15
 
-#define PUSH_BTN 32
-#define TEMP_LED 27
+#define PUSH_BTN 14
+#define TEMP_LED 19
+
 enum deviceState
 {
   NOT_CONNECTED,
@@ -84,7 +85,7 @@ void setup()
   Utils.begin();
   delay(500);
   bluetooth_init();
-  pinMode(PUSH_BTN, INPUT_PULLUP);
+  pinMode(PUSH_BTN, INPUT_PULLDOWN);
 }
 
 void loop()
@@ -291,7 +292,7 @@ void wait_for_press()
 {
   while (true)
   {
-    if (digitalRead(PUSH_BTN) == LOW)
+    if (digitalRead(PUSH_BTN) == HIGH)
     {
       delay(500);
       break;

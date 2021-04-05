@@ -18,10 +18,10 @@ class _RegisterScrnState extends State<RegisterScrn> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightBlue[50],
+      backgroundColor: Colors.indigo[50],
       appBar: AppBar(
           title: Text("Tele-Consulting Doctor"),
-          backgroundColor: Colors.lightBlue[700],
+          backgroundColor: Colors.indigoAccent[700],
           actions: <Widget>[
             TextButton.icon(
                 style: ButtonStyle(
@@ -82,6 +82,9 @@ class _RegisterScrnState extends State<RegisterScrn> {
               ),
               SizedBox(height: 20.0),
               ElevatedButton(
+                  style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.all(Colors.indigoAccent[700])),
                   onPressed: () async {
                     if (_formkey.currentState.validate()) {
                       await Authenticate().registerWithEmailAndPassword(

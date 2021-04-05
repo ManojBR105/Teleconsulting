@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       value: Authenticate().user,
       initialData: null,
       child: MaterialApp(
-        color: Colors.lightBlue[700],
+        color: Colors.indigoAccent[700],
         home: Wrapper(),
       ),
     );

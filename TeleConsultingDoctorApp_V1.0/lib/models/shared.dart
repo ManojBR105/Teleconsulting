@@ -11,7 +11,7 @@ InputDecoration inputdecoration = InputDecoration(
       borderSide: BorderSide(color: Colors.redAccent[400]),
       borderRadius: BorderRadius.circular(8.0)),
   focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.lightBlue[900], width: 1.6),
+      borderSide: BorderSide(color: Colors.lightBlue[200], width: 1.6),
       borderRadius: BorderRadius.circular(8.0)),
   focusedErrorBorder: OutlineInputBorder(
       borderSide: BorderSide(color: Colors.redAccent[400]),

@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:toast/toast.dart';
 
@@ -14,6 +15,19 @@ class MyUser {
   MyUser(User user) {
     this.uid = user.uid;
   }
+}
+
+class Patient {
+  final String name;
+  final String email;
+  final String uid;
+  Patient({this.name, this.email, this.uid});
+}
+
+class Records {
+  final String recID;
+  final String uid;
+  Records({this.recID, this.uid});
 }
 
 class Authenticate {
@@ -72,9 +86,93 @@ class Authenticate {
   }
 }
 
-Future<Map> getUserDetails(MyUser user) async {
-  final DocumentReference ref =
-      FirebaseFirestore.instance.collection('doctors').doc(user.uid);
-  DocumentSnapshot snap = await ref.get();
-  return snap.data();
+class DatabaseService {
+  final String uid;
+  DatabaseService({this.uid});
+
+  // collection reference
+  final CollectionReference patientCollection =
+      FirebaseFirestore.instance.collection('patients');
+
+  // Patient List From Snapshot
+  List<Patient> _patientListFromSnapshot(QuerySnapshot snapshot) {
+    return snapshot.docs.map((doc) {
+      return Patient(
+        name: doc.data()['name'] ?? '',
+        email: doc.data()['email'] ?? '',
+        uid: doc.id ?? '',
+      );
+    }).toList();
+  }
+
+  // get Patients stream
+  Stream<List<Patient>> get patients {
+    return patientCollection.snapshots().map(_patientListFromSnapshot);
+  }
+
+  List<Records> _recordListFromSnapshot(QuerySnapshot snapshot) {
+    return snapshot.docs.map((doc) {
+      return Records(
+        recID: doc.id ?? '',
+        uid: uid ?? '',
+      );
+    }).toList();
+  }
+
+  Stream<List<Records>> get records {
+    final CollectionReference recordCollection =
+        patientCollection.doc(uid).collection('records');
+    return recordCollection
+        .snapshots()
+        .map((snapshot) => _recordListFromSnapshot(snapshot));
+  }
+
+  static Future<Map> getUserDetails(MyUser user) async {
+    final DocumentReference ref =
+        FirebaseFirestore.instance.collection('doctors').doc(user.uid);
+    DocumentSnapshot snap = await ref.get();
+    return snap.data();
+  }
+
+  static Future<void> getRecordData(
+      String uid, String recId, Function setData) async {
+    final DocumentSnapshot recordDocument = await FirebaseFirestore.instance
+        .collection('patients')
+        .doc(uid)
+        .collection('records')
+        .doc(recId)
+        .get();
+
+    Map data = recordDocument.data();
+
+    var tempData =
+        "Ambeint Temp: ${data["Ambient Temperature"]} F, Body Temp: ${data["Body Temperature"]} F";
+
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    File downloadToFilepulse = File('${appDocDir.path}/download-pulse.txt');
+    var pulsePath = downloadToFilepulse.path;
+
+    File downloadToFileheart = File('${appDocDir.path}/download-heart.wav');
+    var heartPath = downloadToFileheart.path;
+
+    try {
+      await FirebaseStorage.instance
+          .ref()
+          .child(uid)
+          .child(recId)
+          .child('pulse.txt')
+          .writeToFile(downloadToFilepulse);
+
+      await FirebaseStorage.instance
+          .ref()
+          .child(uid)
+          .child(recId)
+          .child('heart.wav')
+          .writeToFile(downloadToFileheart);
+    } catch (e) {
+      print('Not Downloaded');
+    }
+
+    setData(tempData, pulsePath, heartPath);
+  }
 }
