@@ -271,7 +271,6 @@ void recordTemperature()
   MLX90614.begin();
   wait_for_press();
   MLX90614.read();
-  MLX90614.close();
 
   String str = "data,";
   int n = str.length() + 1;

@@ -20,7 +20,6 @@ class TEMPERATURE_SENSOR {
 
     void get(float* ambTemp, float* objTemp);
 
-    void close();
 };
 
 #endif

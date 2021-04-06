@@ -6,14 +6,14 @@
 
 void TEMPERATURE_SENSOR::begin()
 {
-    MLX.begin();
     pinMode(LED_PIN, OUTPUT);
+    MLX.begin();
     digitalWrite(LED_PIN, HIGH);
 }
 
 void TEMPERATURE_SENSOR::read()
 {
-
+    
     for (int i = 0; i < 10; i++)
     {
         digitalWrite(LED_PIN, LOW);
@@ -38,6 +38,3 @@ void TEMPERATURE_SENSOR::get(float *ambTemp, float *objTemp)
     *objTemp = avg_obj / 10;
 }
 
-    void TEMPERATURE_SENSOR::close(){
-      Wire.endTransmission(true);
-    }
