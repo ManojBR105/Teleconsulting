@@ -78,13 +78,14 @@ UTILS Utils;
 
 void setup()
 {
+  
   Serial.begin(9600);
+  bluetooth_init();
   SSD1306.begin();
   INMP441.begin();
   delay(500);
   Utils.begin();
   delay(500);
-  bluetooth_init();
   pinMode(PUSH_BTN, INPUT_PULLDOWN);
 }
 
@@ -153,8 +154,6 @@ void record_for_duration()
   send_sent_signal();
   SSD1306.sent_screen(0);
   delay(3000);
-
-  
 
   time = (duration == SHORT) ? 100 : 500;
   send_recording_start_signal(1);
@@ -309,6 +308,7 @@ void btCallback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
   String stringRead = "";
   if (event == ESP_SPP_SRV_OPEN_EVT)
   {
+    
     Serial.println("Client Connected!");
     connected = true;
   }

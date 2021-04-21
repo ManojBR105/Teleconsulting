@@ -335,19 +335,67 @@ class _RecorderWidgetState extends State<RecorderWidget> {
 
   Widget _showStatus() {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(
-            _getStatus(),
-            style: TextStyle(fontSize: 16.0, fontFamily: 'Rubik'),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _getStatus(),
+                    style: TextStyle(fontSize: 16.0, fontFamily: 'Rubik'),
+                  ),
+                  SizedBox(height: 50.0),
+                  _options(),
+                ]),
           ),
-          SizedBox(height: 50.0),
-          _options()
-        ]),
+          Divider(),
+          _getInstructions(),
+        ],
       ),
     );
+  }
+
+  Widget _getInstructions() {
+    String instruction = "";
+    var img;
+    switch (_deviceState) {
+      case DeviceState.RECORDING_TEMP:
+        instruction =
+            "Point the Temperature Sensor at your skin surface at a distance of 3-5cm and press the button on the device to record.";
+        img = AssetImage("images/temperature.jpg");
+        break;
+      case DeviceState.RECORDING_PULSE:
+        instruction =
+            "Place and hold your finger gently on the Pulseoximeter sensor to start recording pulse data.";
+        img = AssetImage("images/pulse.jpg");
+        break;
+      case DeviceState.RECORDING_HEART:
+        instruction =
+            "Hold the sthethoscope chest head near the chest slightly towards left and press the button on the device to start recording.";
+        img = AssetImage("images/sthethoscope.jpg");
+        break;
+      default:
+        break;
+    }
+    return img != null
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image(
+                image: img,
+                height: 150.0,
+                alignment: Alignment.center,
+              ),
+              Divider(),
+              Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(instruction),
+              )
+            ],
+          )
+        : Container();
   }
 
   Widget _options() {

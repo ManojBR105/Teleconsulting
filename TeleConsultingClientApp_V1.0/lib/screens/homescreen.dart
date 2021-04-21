@@ -47,7 +47,14 @@ class _HomeScrnState extends State<HomeScrn> {
                 label: Text("Logout"))
           ],
         ),
-        body: _userDetailsPage(),
+        body: Container(
+            // decoration: BoxDecoration(
+            //   image: DecorationImage(
+            //     image: AssetImage("images/background.jpg"),
+            //     fit: BoxFit.cover,
+            //   ),
+            // ),
+            child: _userDetailsPage()),
         floatingActionButton: TextButton.icon(
           icon: Icon(
             Icons.add_circle,
@@ -109,41 +116,6 @@ class _HomeScrnState extends State<HomeScrn> {
                             fontSize: 15.0,
                             color: Colors.grey[600],
                             letterSpacing: 1.2),
-                      ),
-                      SizedBox(height: 10.0),
-                      Card(
-                        color: Colors.greenAccent[700],
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0)),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(5.0, 5.0, 5.0, 0.0),
-                              child: Text(
-                                "100.00",
-                                style: TextStyle(
-                                    // backgroundColor: Colors.greenAccent[700],
-                                    color: Colors.white,
-                                    fontSize: 30.0,
-                                    fontFamily: 'OdibeeSans'),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                "Health Score",
-                                style: TextStyle(
-                                    fontSize: 16.0,
-                                    letterSpacing: 1.2,
-                                    color: Colors.white,
-                                    fontFamily: 'OdibeeSans'),
-                              ),
-                            ),
-                          ],
-                        ),
                       )
                     ],
                   )
