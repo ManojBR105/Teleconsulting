@@ -53,15 +53,20 @@ void SPI_OLED::pre_record_screen(int param)
     }
     else if (param == 1)
     {
-        display->drawStr(5, 20, "  Place and hold your");
-        display->drawStr(10, 30, "  finger on sensor to");
-        display->drawStr(10, 40, "    record pulse data");
+        display->drawStr(5, 25, "  Place and hold your");
+        display->drawStr(10, 35, "  finger on sensor to");
+        display->drawStr(10, 45, "    record pulse data");
     }
     else if (param == 2)
     {
-        display->drawStr(0, 20,  "Place the sthethoscope");
-        display->drawStr(0, 30,  "and press the button to");
-        display->drawStr(5, 40,  "    record heart beat");
+        display->drawStr(0, 25,  "Place the sthethoscope");
+        display->drawStr(0, 35,  "and press the button to");
+        display->drawStr(5, 45,  "    record heart beat");
+    }
+    else{
+        display->drawStr(0, 25,  "Connect The BP Addon");
+        display->drawStr(0, 35,  "and press the button to");
+        display->drawStr(0, 45,  "record blood pressure");
     }
     display->sendBuffer();
 }
@@ -96,28 +101,30 @@ void SPI_OLED::result_screen(float avgIBI, float avgBPM, float RMSSD, float SDNN
     char str[6];
     sprintf(buff, "HRV RESULT");
     display->drawStr(20, 8, buff);
+    display->setFont(u8g2_font_5x8_tr);
     dtostrf(avgBPM, 4, 2, str);
     sprintf(buff, ": %s", str);
-    display->drawStr(5, 20, "Avg BPM");
-    display->drawStr(70, 20, buff);
+    display->drawStr(5, 23, "Avg BPM");
+    display->drawStr(70, 23, buff);
     dtostrf(avgIBI, 4, 2, str);
     sprintf(buff, ": %s", str);
-    display->drawStr(5, 30, "Avg IBI");
-    display->drawStr(70, 30, buff);
+    display->drawStr(5, 33, "Avg IBI");
+    display->drawStr(70, 33, buff);
     dtostrf(SDNN, 4, 2, str);
     sprintf(buff, ": %s", str);
-    display->drawStr(5, 40, "SDNN");
-    display->drawStr(70, 40, buff);
+    display->drawStr(5, 43, "SDNN");
+    display->drawStr(70, 43, buff);
     dtostrf(RMSSD, 4, 2, str);
     sprintf(buff, ": %s", str);
-    display->drawStr(5, 50, "RMSSD");
-    display->drawStr(70, 50, buff);
+    display->drawStr(5, 53, "RMSSD");
+    display->drawStr(70, 53, buff);
     dtostrf(avgSPO2, 4, 2, str);
     sprintf(buff, ": %s", str);
-    display->drawStr(5, 60, "Avg SPO2");
-    display->drawStr(70, 60, buff);
+    display->drawStr(5, 63, "Avg SPO2");
+    display->drawStr(70, 63, buff);
     display->sendBuffer();
     delay(5000);
+    display->setFont(u8g2_font_ncenB08_tr);
 }
 
 void SPI_OLED::finished_record_screen()
@@ -134,10 +141,12 @@ void SPI_OLED::sent_screen(int param)
     display->clearBuffer();
     display->drawBitmap(32, 5, 8, 40, done);
     if(param==0)
-    display->drawStr(5, 60, " Sent Temperatur Data ");
+    display->drawStr(5, 60, "Sent Temperature Data ");
     else if(param==1)
     display->drawStr(5, 60, " Sent Pulse Rate Data ");
     else if(param==2)
     display->drawStr(5, 60, " Sent Heart Beat Data ");
+    else if(param==3)
+    display->drawStr(0, 60, " Sent Blood Pressure Data ");
     display->sendBuffer();
 }

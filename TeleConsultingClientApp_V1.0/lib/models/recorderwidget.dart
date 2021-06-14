@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:client_app/models/firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 import 'package:toast/toast.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:path_provider/path_provider.dart';
@@ -16,6 +17,7 @@ enum DeviceState {
   RECORDING_TEMP,
   RECORDING_PULSE,
   RECORDING_HEART,
+  RECORDING_BP,
   SUCCESS
 }
 
@@ -43,8 +45,13 @@ class _RecorderWidgetState extends State<RecorderWidget> {
   List<String> _durationChoices = ["Short", "Long"];
   double _ambientTempF;
   double _objectTempF;
+  double _systolic;
+  double _diastolic;
+  double _pulse;
   bool _isTempRecorded = false;
   bool _isReadyToUpload = false;
+  bool _isBpRecorded = false;
+  bool _recordBP = false;
 
   DeviceState _deviceState = DeviceState.IDLE;
 
@@ -89,6 +96,11 @@ class _RecorderWidgetState extends State<RecorderWidget> {
       case "RECORDING STARTED,2\n":
         setState(() {
           _deviceState = DeviceState.RECORDING_HEART;
+        });
+        break;
+      case "RECORDING STARTED,3\n":
+        setState(() {
+          _deviceState = DeviceState.RECORDING_BP;
         });
         break;
       case "SENT\n":
@@ -143,13 +155,23 @@ class _RecorderWidgetState extends State<RecorderWidget> {
         _chunks.clear();
         totLength = 0;
       });
-    } else if (String.fromCharCodes(_chunks[0]).startsWith("data")) {
-      String data = String.fromCharCodes(_chunks[0]).substring(5);
+    } else if (String.fromCharCodes(_chunks[0]).startsWith("data,temp")) {
+      String data = String.fromCharCodes(_chunks[0]).substring(10);
       if (_chunks.length > 1) data += String.fromCharCodes(_chunks[1]);
       _ambientTempF = double.parse(data.split(",")[0]);
       _objectTempF = double.parse(data.split(",")[1]);
       _isTempRecorded = true;
-      print("Ambient Temp: $_ambientTempF F, Body Temp: $_objectTempF F");
+      setState(() {
+        _chunks.clear();
+        totLength = 0;
+      });
+    } else if (String.fromCharCodes(_chunks[0]).startsWith("data,bp")) {
+      String data = String.fromCharCodes(_chunks[0]).substring(8);
+      if (_chunks.length > 1) data += String.fromCharCodes(_chunks[1]);
+      _systolic = double.parse(data.split(",")[0]);
+      _diastolic = double.parse(data.split(",")[1]);
+      _pulse = double.parse(data.split(",")[2]);
+      _isBpRecorded = true;
       setState(() {
         _chunks.clear();
         totLength = 0;
@@ -197,6 +219,9 @@ class _RecorderWidgetState extends State<RecorderWidget> {
       case DeviceState.RECORDING_HEART:
         state = 'Recording Heart Beat';
         break;
+      case DeviceState.RECORDING_BP:
+        state = 'Recording Blood Pressure';
+        break;
       case DeviceState.SUCCESS:
         state = 'Recording Successfull';
         break;
@@ -206,9 +231,15 @@ class _RecorderWidgetState extends State<RecorderWidget> {
 
   _sendRecordSignal() async {
     try {
-      _connection.output
-          .add(Uint8List.fromList("START,$_recordDuration\n".codeUnits));
-      await _connection.output.allSent;
+      if (_recordBP) {
+        _connection.output
+            .add(Uint8List.fromList("START,$_recordDuration,BP\n".codeUnits));
+        await _connection.output.allSent;
+      } else {
+        _connection.output
+            .add(Uint8List.fromList("START,$_recordDuration\n".codeUnits));
+        await _connection.output.allSent;
+      }
     } catch (e) {
       Toast.show("Something went Wrong, Couldn't Send Signal", context,
           duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
@@ -264,6 +295,38 @@ class _RecorderWidgetState extends State<RecorderWidget> {
               child: Text(
                 "Select Recording Duration",
                 style: TextStyle(color: Colors.lightBlue[700], fontSize: 18.0),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Measure BP ",
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                  FlutterSwitch(
+                    activeColor: Colors.blueGrey[100],
+                    inactiveColor: Colors.blueGrey[100],
+                    activeTextColor: Colors.lightBlue[700],
+                    activeToggleColor: Colors.lightBlue[700],
+                    width: 80.0,
+                    height: 30.0,
+                    valueFontSize: 15.0,
+                    toggleSize: 20.0,
+                    value: _recordBP,
+                    borderRadius: 20.0,
+                    padding: 5.0,
+                    showOnOff: true,
+                    onToggle: (val) {
+                      if (_deviceState == DeviceState.IDLE) {
+                        _recordBP = val;
+                        setState(() {});
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
             Divider(),
@@ -376,6 +439,11 @@ class _RecorderWidgetState extends State<RecorderWidget> {
             "Hold the sthethoscope chest head near the chest slightly towards left and press the button on the device to start recording.";
         img = AssetImage("images/sthethoscope.jpg");
         break;
+      case DeviceState.RECORDING_BP:
+        instruction =
+            "Connect the BP add-on and wear the cuff firmly and press the button on the device to start recording.";
+        img = AssetImage("images/bloodpressure.jpg");
+        break;
       default:
         break;
     }
@@ -445,7 +513,17 @@ class _RecorderWidgetState extends State<RecorderWidget> {
                     setState(() {});
                   },
                 );
-              }).toList()),
+              }).toList() +
+              [
+                _isBpRecorded
+                    ? ListTile(
+                        title: Text("Blood Pressure"),
+                        tileColor: Colors.white,
+                        subtitle: Text(
+                            "Systolic: $_systolic mmHg, diastolic: $_diastolic mmHg, Pulse: $_pulse bpm"),
+                      )
+                    : SizedBox(height: 0),
+              ]),
     );
   }
 }
