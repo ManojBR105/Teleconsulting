@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:doctor_app/models/firebase.dart';
-import 'package:doctor_app/models/shared.dart';
-import 'package:doctor_app/screens/pulse_data_screen.dart';
+import 'package:client_app/models/shared.dart';
+import 'package:client_app/models/firebase.dart';
+import 'package:client_app/screens/pulse_data_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 
@@ -69,18 +69,8 @@ class _RecordedDataState extends State<RecordedData> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.indigo[50],
-      floatingActionButton: TextButton(
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(Colors.indigoAccent[700]),
-          foregroundColor: MaterialStateProperty.all(Colors.white),
-        ),
-        child: Text("Add Remark"),
-        onPressed: () {
-          showPopUpDescription();
-        },
-      ),
       appBar: AppBar(
-        backgroundColor: Colors.indigoAccent[700],
+        backgroundColor: Colors.lightBlue[700],
         title: Text(getDateFrom(recId) + "\t" + getTimeFrom(recId)),
       ),
       body: loading
@@ -175,58 +165,5 @@ class _RecordedDataState extends State<RecordedData> {
         )),
       ),
     );
-  }
-
-  showPopUpDescription() {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Row(
-              children: [
-                Text("Add Remark to this recording"),
-              ],
-            ),
-            content: Form(
-              key: formkey,
-              child: TextFormField(
-                  initialValue: remark,
-                  decoration: inputdecoration.copyWith(hintText: 'remark'),
-                  keyboardType: TextInputType.name,
-                  maxLines: 3,
-                  maxLength: 100,
-                  validator: (value) {
-                    if (value.characters.length > 100) {
-                      return 'remark should be below 100 characters';
-                    }
-                    return null;
-                  },
-                  onChanged: (val) {
-                    remark = val;
-                    setState(() {});
-                  }),
-            ),
-            actions: [
-              ElevatedButton(
-                  style: ButtonStyle(
-                      backgroundColor:
-                          MaterialStateProperty.all(Colors.indigoAccent[700])),
-                  onPressed: () async {
-                    await DatabaseService.setRemark(uid, recId, remark);
-                    Navigator.pop(context);
-                  },
-                  child: Text("Update")),
-              IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: Icon(
-                  Icons.cancel,
-                  size: 35.0,
-                ),
-              )
-            ],
-          );
-        });
   }
 }

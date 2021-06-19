@@ -10,7 +10,7 @@ void TEMPERATURE_SENSOR::begin()
     digitalWrite(LED_PIN, HIGH);
 }
 
-void TEMPERATURE_SENSOR::read()
+void TEMPERATURE_SENSOR::read(void (*f)(float, float))
 {
     
     for (int i = 0; i < 10; i++)
@@ -19,6 +19,7 @@ void TEMPERATURE_SENSOR::read()
         AMB_TEMP[i] = MLX.readAmbientTempF();
         OBJ_TEMP[i] = MLX.readObjectTempF();
         delay(100);
+        f(AMB_TEMP[i], OBJ_TEMP[i]);
         digitalWrite(LED_PIN, LOW);
         delay(100);
     }

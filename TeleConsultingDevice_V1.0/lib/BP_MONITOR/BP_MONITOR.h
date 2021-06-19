@@ -9,10 +9,11 @@ class BP_MONITOR {
     int con;
     int vlv;
     int pmp;
+    void (*cb)(float, bool); 
 
     static const int degree = 4;
     static const int prec = 4;
-    static const uint16_t period = 40000;
+    static const uint16_t period = 50000;
     const float scale = 28237.07571;
     const float systolic_factor = 0.593;
     const float diastolic_factor = 0.717;
@@ -22,9 +23,10 @@ class BP_MONITOR {
     uint16_t size;
     double coeff[degree+1];
     double x_max, y_max;
+    bool inflating = false;
 
     public:
-    BP_MONITOR(int DT, int SCK, int CON, int VLV, int PMP);
+    BP_MONITOR(int DT, int SCK, int CON, int VLV, int PMP, void (*func)(float, bool));
 
     bool check();
 

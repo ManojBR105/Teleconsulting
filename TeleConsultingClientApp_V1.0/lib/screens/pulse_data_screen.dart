@@ -56,7 +56,7 @@ class _PulseDataScreenState extends State<PulseDataScreen> {
     lineGraphData.add(
       chart.Series(
         colorFn: (__, _) =>
-            chart.ColorUtil.fromDartColor(Colors.indigoAccent[700]),
+            chart.ColorUtil.fromDartColor(Colors.lightBlue[700]),
         id: 'IBI values',
         data: pulseData,
         domainFn: (PulseData pulse, _) => pulse.index,
@@ -73,7 +73,7 @@ class _PulseDataScreenState extends State<PulseDataScreen> {
         data: hrvData,
         fillPatternFn: (_, __) => chart.FillPatternType.solid,
         fillColorFn: (HrvData hrv, _) =>
-            chart.ColorUtil.fromDartColor(Colors.indigoAccent[700]),
+            chart.ColorUtil.fromDartColor(Colors.lightBlue[700]),
       ),
     );
 
@@ -88,7 +88,7 @@ class _PulseDataScreenState extends State<PulseDataScreen> {
     return Scaffold(
       backgroundColor: Colors.indigo[50],
       appBar: AppBar(
-        backgroundColor: Colors.indigoAccent[700],
+        backgroundColor: Colors.lightBlue[700],
         title: Text("Pulse Data"),
       ),
       body: loading
@@ -96,14 +96,14 @@ class _PulseDataScreenState extends State<PulseDataScreen> {
           : Column(
               children: [
                 ListTile(
-                  tileColor: Colors.indigoAccent[100],
+                  tileColor: Colors.lightBlue[100],
                   title: Text("IBI Values"),
                 ),
                 Container(
                     height: MediaQuery.of(context).size.height * 0.3,
                     child: chart.LineChart(lineGraphData)),
                 ListTile(
-                  tileColor: Colors.indigoAccent[100],
+                  tileColor: Colors.lightBlue[100],
                   title: Text("HRV parameters"),
                 ),
                 Container(

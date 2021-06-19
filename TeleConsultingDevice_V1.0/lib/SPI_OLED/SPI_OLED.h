@@ -31,11 +31,17 @@ class SPI_OLED
 
     void pre_record_screen(int param);
 
+    void record_screen(float ambient, float body);
+
+    void record_screen(float pressure, bool inflating);
+
     void record_screen(float progress);
 
     void record_screen(uint16_t bpm, uint16_t n, uint8_t* wave, uint16_t num_samples);
 
     void result_screen(float avgIBI, float avgBPM, float RMSSD, float SDNN, float avgSPO2);
+
+    void result_screen(float systolic, float diastolic, float pulse);
 
     void finished_record_screen();
 

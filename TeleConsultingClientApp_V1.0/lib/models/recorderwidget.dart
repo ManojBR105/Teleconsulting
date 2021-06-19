@@ -274,12 +274,16 @@ class _RecorderWidgetState extends State<RecorderWidget> {
         user,
         _ambientTempF,
         _objectTempF,
+        _systolic,
+        _diastolic,
+        _pulse,
         File(await _path + "/Pulse_Data.txt"),
         File(await _path + "/Heart_Beat.wav"),
         context, () async {
       await _deletePrevFiles();
       _isReadyToUpload = false;
       _isTempRecorded = false;
+      _isBpRecorded = false;
       await _listofFles();
     });
   }

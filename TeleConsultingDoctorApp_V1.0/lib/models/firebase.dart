@@ -145,8 +145,23 @@ class DatabaseService {
 
     Map data = recordDocument.data();
 
+    double ambTemp = double.parse(data["Ambient Temperature"]);
+    double bodTemp = double.parse(data["Body Temperature"]);
+    String remark = data["remark"];
+    print(remark);
+
     var tempData =
-        "Ambeint Temp: ${data["Ambient Temperature"]} F, Body Temp: ${data["Body Temperature"]} F";
+        "${ambTemp.toStringAsFixed(2)},${bodTemp.toStringAsFixed(2)}";
+
+    var bpData;
+
+    if (data["Systolic Pressure"] != null) {
+      double systolic = double.parse(data["Systolic Pressure"]);
+      double diastolic = double.parse(data["Diastolic Pressure"]);
+      double pulse = double.parse(data["Pulse"]);
+      bpData =
+          "${systolic.toStringAsFixed(1)},${diastolic.toStringAsFixed(1)}, ${pulse.toStringAsFixed(1)}";
+    }
 
     Directory appDocDir = await getApplicationDocumentsDirectory();
     File downloadToFilepulse = File('${appDocDir.path}/download-pulse.txt');
@@ -173,6 +188,15 @@ class DatabaseService {
       print('Not Downloaded');
     }
 
-    setData(tempData, pulsePath, heartPath);
+    setData(tempData, bpData, pulsePath, heartPath, remark);
+  }
+
+  static Future<void> setRemark(patientID, recID, remark) async {
+    final DocumentReference ref = FirebaseFirestore.instance
+        .collection('patients')
+        .doc(patientID)
+        .collection('records')
+        .doc(recID);
+    await ref.update({"remark": remark});
   }
 }

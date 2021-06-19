@@ -1,12 +1,13 @@
 #include "BP_MONITOR.h"
 
-BP_MONITOR::BP_MONITOR(int DT, int SCK, int CON, int VLV, int PMP)
+BP_MONITOR::BP_MONITOR(int DT, int SCK, int CON, int VLV, int PMP, void (*func)(float, bool))
 {
     dt = DT;
     clk = SCK;
     con = CON;
     vlv = VLV;
     pmp = PMP;
+    cb = func;
 }
 
 void BP_MONITOR::begin()
@@ -29,7 +30,9 @@ bool BP_MONITOR::check(){
 
 void BP_MONITOR::measureBP(float *sys, float *dia, float *pr)
 {
+    inflating = true;
     setPressure(150);
+    inflating = false;
     takeReadingsUpto(50);
     releasePressure();
     uint16_t x[size];
@@ -138,6 +141,7 @@ uint32_t BP_MONITOR::readPressure()
     delayMicroseconds(10);
     digitalWrite(clk, LOW);
     //Serial.print("Pressure: ");
+    cb(res/scale, inflating);
     return res;
 }
 

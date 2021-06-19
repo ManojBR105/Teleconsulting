@@ -34,8 +34,8 @@ extern "C"
 #define DT 12
 #define SCK 13
 #define CON 14
-#define VLV 17
-#define PMP 16
+#define VLV 16
+#define PMP 17
 
 enum deviceState
 {
@@ -71,6 +71,9 @@ void wait_for_press(void);
 
 void pulseOximeterCallback(void);
 
+void display_pressure(float, bool);
+void display_temperature(float, float);
+
 deviceState state = NOT_CONNECTED;
 Duration duration;
 
@@ -84,7 +87,7 @@ I2S_MIC INMP441 = I2S_MIC(WS_PIN, SD_PIN, SCK_PIN, PORT, SAMPLE_RATE, SAMPLE_BIT
 TEMPERATURE_SENSOR MLX90614 = TEMPERATURE_SENSOR(TEMP_LED);
 SPI_OLED SSD1306 = SPI_OLED(RES, DC, CS);
 PULSE_OXIMETER MY_SENSOR = PULSE_OXIMETER(pulseOximeterCallback);
-BP_MONITOR BP_ADDON = BP_MONITOR(DT, SCK, CON, VLV, PMP);
+BP_MONITOR BP_ADDON = BP_MONITOR(DT, SCK, CON, VLV, PMP, display_pressure);
 BluetoothSerial SerialBT;
 UTILS Utils;
 
@@ -170,7 +173,7 @@ void record_for_duration()
   SSD1306.sent_screen(0);
   delay(3000);
 
-  time = (duration == SHORT) ? 10 : 500;
+  time = (duration == SHORT) ? 60 : 500;
   send_recording_start_signal(1);
   SSD1306.pre_record_screen(1);
   delay(2000);
@@ -179,13 +182,13 @@ void record_for_duration()
   delay(2000);
   send_sent_signal();
   SSD1306.sent_screen(1);
-  delay(3000);
+  delay(5000);
 
   while (!done)
     ;
   done = false;
 
-  time = (duration == SHORT) ? 5 : 120;
+  time = (duration == SHORT) ? 10 : 120;
   send_recording_start_signal(2);
   SSD1306.pre_record_screen(2);
   wait_for_press();
@@ -298,12 +301,15 @@ void recordPulseRate(int numSamples)
   free(encodedData);
 }
 
+void display_temperature(float amb, float obj){
+    SSD1306.record_screen(amb, obj);
+}
+
 void recordTemperature()
 {
-  
   MLX90614.begin();
   wait_for_press();
-  MLX90614.read();
+  MLX90614.read(display_temperature);
 
   String str = "data,temp,";
   int n = str.length() + 1;
@@ -316,6 +322,8 @@ void recordTemperature()
   std::ostringstream ss;
   float amb_temp, obj_temp;
   MLX90614.get(&amb_temp, &obj_temp);
+  display_temperature(amb_temp, obj_temp);
+  delay(3000);
   ss << amb_temp << "," << obj_temp;
   std::string var = ss.str();
 
@@ -324,6 +332,10 @@ void recordTemperature()
   strncpy(data, var.c_str(), n);
   SerialBT.write((uint8_t *)data, var.length());
   Serial.flush();
+}
+
+void display_pressure(float press, bool inflating){
+  SSD1306.record_screen(press, inflating);
 }
 
 void recordBloodPressure()
@@ -343,6 +355,8 @@ void recordBloodPressure()
     return;
   }
   BP_ADDON.measureBP(&systolic, &diastolic, &pulse);
+  SSD1306.result_screen(systolic, diastolic, pulse);
+  delay(5000);
 
   String str = "data,bp,";
   int n = str.length() + 1;

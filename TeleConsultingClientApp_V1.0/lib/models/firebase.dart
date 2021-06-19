@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -84,6 +85,9 @@ Future<void> uploadDataToFirebase(
     MyUser user,
     double ambientTemperature,
     double bodyTemperature,
+    double systolicPressure,
+    double diastolicPressure,
+    double pulse,
     File pulseFile,
     File heartFile,
     BuildContext context,
@@ -99,7 +103,7 @@ Future<void> uploadDataToFirebase(
           SnackBar(content: Text("File doesn't exist please record again")));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Uploading Temperature data ...")));
+          SnackBar(content: Text("Uploading Temperature and BP data ...")));
 
       final DocumentReference temperatureRef = FirebaseFirestore.instance
           .collection('patients')
@@ -109,7 +113,10 @@ Future<void> uploadDataToFirebase(
 
       await temperatureRef.set({
         "Ambient Temperature": ambientTemperature.toString(),
-        "Body Temperature": bodyTemperature.toString()
+        "Body Temperature": bodyTemperature.toString(),
+        "Systolic Pressure": systolicPressure.toString(),
+        "Diastolic Pressure": diastolicPressure.toString(),
+        "Pulse": pulse.toString()
       });
 
       ScaffoldMessenger.of(context)
@@ -155,5 +162,110 @@ Future<void> uploadDataToFirebase(
   } catch (e) {
     Toast.show(e.message.toString(), context,
         duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+  }
+}
+
+class Records {
+  final String recID;
+  final String uid;
+  Records({this.recID, this.uid});
+}
+
+class DatabaseService {
+  final String uid;
+  DatabaseService({this.uid});
+
+  // collection reference
+  final CollectionReference patientCollection =
+      FirebaseFirestore.instance.collection('patients');
+
+  List<Records> _recordListFromSnapshot(QuerySnapshot snapshot) {
+    return snapshot.docs.map((doc) {
+      return Records(
+        recID: doc.id ?? '',
+        uid: uid ?? '',
+      );
+    }).toList();
+  }
+
+  Stream<List<Records>> get records {
+    final CollectionReference recordCollection =
+        patientCollection.doc(uid).collection('records');
+    return recordCollection
+        .snapshots()
+        .map((snapshot) => _recordListFromSnapshot(snapshot));
+  }
+
+  static Future<Map> getUserDetails(MyUser user) async {
+    final DocumentReference ref =
+        FirebaseFirestore.instance.collection('doctors').doc(user.uid);
+    DocumentSnapshot snap = await ref.get();
+    return snap.data();
+  }
+
+  static Future<void> getRecordData(
+      String uid, String recId, Function setData) async {
+    final DocumentSnapshot recordDocument = await FirebaseFirestore.instance
+        .collection('patients')
+        .doc(uid)
+        .collection('records')
+        .doc(recId)
+        .get();
+
+    Map data = recordDocument.data();
+
+    double ambTemp = double.parse(data["Ambient Temperature"]);
+    double bodTemp = double.parse(data["Body Temperature"]);
+    String remark = data["remark"];
+    print(remark);
+
+    var tempData =
+        "${ambTemp.toStringAsFixed(2)},${bodTemp.toStringAsFixed(2)}";
+
+    var bpData;
+
+    if (data["Systolic Pressure"] != null) {
+      double systolic = double.parse(data["Systolic Pressure"]);
+      double diastolic = double.parse(data["Diastolic Pressure"]);
+      double pulse = double.parse(data["Pulse"]);
+      bpData =
+          "${systolic.toStringAsFixed(1)},${diastolic.toStringAsFixed(1)}, ${pulse.toStringAsFixed(1)}";
+    }
+
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    File downloadToFilepulse = File('${appDocDir.path}/download-pulse.txt');
+    var pulsePath = downloadToFilepulse.path;
+
+    File downloadToFileheart = File('${appDocDir.path}/download-heart.wav');
+    var heartPath = downloadToFileheart.path;
+
+    try {
+      await FirebaseStorage.instance
+          .ref()
+          .child(uid)
+          .child(recId)
+          .child('pulse.txt')
+          .writeToFile(downloadToFilepulse);
+
+      await FirebaseStorage.instance
+          .ref()
+          .child(uid)
+          .child(recId)
+          .child('heart.wav')
+          .writeToFile(downloadToFileheart);
+    } catch (e) {
+      print('Not Downloaded');
+    }
+
+    setData(tempData, bpData, pulsePath, heartPath, remark);
+  }
+
+  static Future<void> setRemark(patientID, recID, remark) async {
+    final DocumentReference ref = FirebaseFirestore.instance
+        .collection('patients')
+        .doc(patientID)
+        .collection('records')
+        .doc(recID);
+    await ref.update({"remark": remark});
   }
 }

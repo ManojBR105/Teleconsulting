@@ -16,7 +16,7 @@ class TEMPERATURE_SENSOR {
 
     void begin();
 
-    void read();
+    void read(void (*f)(float , float));
 
     void get(float* ambTemp, float* objTemp);
 

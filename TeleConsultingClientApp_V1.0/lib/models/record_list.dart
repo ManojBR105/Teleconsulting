@@ -1,22 +1,17 @@
-import 'package:doctor_app/models/firebase.dart';
-import 'package:doctor_app/models/recorded_dat.dart';
-import 'package:doctor_app/models/shared.dart';
+import 'package:client_app/models/firebase.dart';
+import 'package:client_app/models/recorded_data.dart';
+import 'package:client_app/models/shared.dart';
 import 'package:flutter/material.dart';
 
 class RecordListScreen extends StatelessWidget {
-  final Patient patient;
-  RecordListScreen(this.patient);
+  final String patientID;
+  RecordListScreen(this.patientID);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.indigo[50],
-      appBar: AppBar(
-        backgroundColor: Colors.indigoAccent[700],
-        title: Text("Recordings of " + patient.name),
-      ),
-      body: StreamBuilder(
-          stream: DatabaseService(uid: patient.uid).records,
+    return Expanded(
+      child: StreamBuilder(
+          stream: DatabaseService(uid: patientID).records,
           builder:
               (BuildContext context, AsyncSnapshot<List<Records>> records) {
             return records.data == null
@@ -34,7 +29,7 @@ class RecordListScreen extends StatelessWidget {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => RecordedData(
-                                          patient.uid,
+                                          patientID,
                                           records.data[index].recID)));
                             },
                             title: Text(getDateFrom(records.data[index].recID)),

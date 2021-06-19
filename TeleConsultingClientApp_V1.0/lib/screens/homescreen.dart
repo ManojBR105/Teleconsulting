@@ -1,4 +1,5 @@
 import 'package:client_app/models/firebase.dart';
+import 'package:client_app/models/record_list.dart';
 import 'package:flutter/material.dart';
 import 'package:client_app/screens/recorderscreen.dart';
 
@@ -47,14 +48,7 @@ class _HomeScrnState extends State<HomeScrn> {
                 label: Text("Logout"))
           ],
         ),
-        body: Container(
-            // decoration: BoxDecoration(
-            //   image: DecorationImage(
-            //     image: AssetImage("images/background.jpg"),
-            //     fit: BoxFit.cover,
-            //   ),
-            // ),
-            child: _userDetailsPage()),
+        body: Container(child: _userDetailsPage()),
         floatingActionButton: TextButton.icon(
           icon: Icon(
             Icons.add_circle,
@@ -83,80 +77,53 @@ class _HomeScrnState extends State<HomeScrn> {
     return Column(
       children: [
         Card(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0)),
-            margin: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 0.0),
-            color: Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.blueGrey[100],
-                      child: Icon(Icons.person_rounded,
-                          size: 50.0, color: Colors.grey[800]),
-                      radius: 50.0,
-                    ),
-                  ),
-                  SizedBox(width: 20.0),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        loading ? "Username" : userData["name"].toString(),
-                        style: TextStyle(fontSize: 25.0, fontFamily: 'Rubik'),
-                      ),
-                      Text(
-                        loading
-                            ? "email@domain.com"
-                            : userData["email"].toString(),
-                        style: TextStyle(
-                            fontSize: 15.0,
-                            color: Colors.grey[600],
-                            letterSpacing: 1.2),
-                      )
-                    ],
-                  )
-                ],
-              ),
-            )),
-        Card(
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-          margin: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 0.0),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+          margin: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 0.0),
           color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                  child: Text(
-                    "Recordings",
-                    style:
-                        TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
+                  padding: const EdgeInsets.all(10.0),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.blueGrey[100],
+                    child: Icon(Icons.person_rounded,
+                        size: 30.0, color: Colors.grey[800]),
+                    radius: 30.0,
                   ),
                 ),
-                SizedBox(
-                  width: 250.0,
-                  child: TextField(
-                    decoration: InputDecoration(
-                        hintText: 'Search',
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.blueGrey[100]),
-                            borderRadius: BorderRadius.circular(20.0)),
-                        fillColor: Colors.blueGrey[100],
-                        filled: true,
-                        suffixIcon: Icon(Icons.search_rounded)),
-                  ),
-                ),
+                SizedBox(width: 20.0),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      loading ? "Username" : userData["name"].toString(),
+                      style: TextStyle(fontSize: 25.0, fontFamily: 'Rubik'),
+                    ),
+                    Text(
+                      loading
+                          ? "email@domain.com"
+                          : userData["email"].toString(),
+                      style: TextStyle(
+                          fontSize: 15.0,
+                          color: Colors.grey[600],
+                          letterSpacing: 1.2),
+                    )
+                  ],
+                )
               ],
             ),
           ),
-        )
+        ),
+        SizedBox(height: 10),
+        ListTile(
+          title: Text("Recordings",
+              style: TextStyle(color: Colors.white, fontSize: 18.0)),
+          tileColor: Colors.lightBlue[700],
+        ),
+        RecordListScreen(user.uid)
       ],
     );
   }

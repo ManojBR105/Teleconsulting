@@ -17,3 +17,15 @@ InputDecoration inputdecoration = InputDecoration(
       borderSide: BorderSide(color: Colors.redAccent[400]),
       borderRadius: BorderRadius.circular(8.0)),
 );
+
+String getDateFrom(String text) {
+  var list = text.split('_');
+
+  return "Date:  " + list[2] + '.' + list[1] + '.' + list[0];
+}
+
+String getTimeFrom(String text) {
+  var list = text.split('_');
+
+  return "Time:  " + list[3] + ':' + list[4] + ':' + list[5];
+}

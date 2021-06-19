@@ -24,6 +24,7 @@ class _HomeScrnState extends State<HomeScrn> {
 
   _loadUserData() async {
     userData = await DatabaseService.getUserDetails(user);
+    print(userData);
     setState(() {
       loading = false;
     });
@@ -87,13 +88,19 @@ class _HomeScrnState extends State<HomeScrn> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      loading ? "Username" : userData["name"].toString(),
+                      loading
+                          ? "Username"
+                          : userData != null
+                              ? userData["name"].toString()
+                              : "loading",
                       style: TextStyle(fontSize: 25.0, fontFamily: 'Rubik'),
                     ),
                     Text(
                       loading
                           ? "email@domain.com"
-                          : userData["email"].toString(),
+                          : userData != null
+                              ? userData["email"].toString()
+                              : "loading",
                       style: TextStyle(
                           fontSize: 15.0,
                           color: Colors.grey[600],
