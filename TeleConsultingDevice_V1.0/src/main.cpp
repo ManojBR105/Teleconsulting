@@ -51,6 +51,14 @@ enum Duration
   LONG
 };
 
+enum Param
+{
+  TEMP,
+  PULSE,
+  HEART,
+  BP
+};
+
 char *dtostrf(double val, signed char width, unsigned char prec, char *s);
 
 void bluetooth_init();
@@ -76,6 +84,7 @@ void display_temperature(float, float);
 
 deviceState state = NOT_CONNECTED;
 Duration duration;
+Param parameter = TEMP;
 
 volatile bool connected = false;
 volatile bool record = false;
@@ -162,65 +171,64 @@ void loop()
 void record_for_duration()
 {
   int time;
+  switch(parameter){
+    case TEMP:
+      send_recording_start_signal(0);
+      SSD1306.pre_record_screen(0);
+      delay(2000);
+      recordTemperature();
 
-  send_recording_start_signal(0);
-  SSD1306.pre_record_screen(0);
-  delay(2000);
-  recordTemperature();
+      delay(2000);
+      send_sent_signal();
+      SSD1306.sent_screen(0);
+      delay(3000);
+      break;
 
-  delay(2000);
-  send_sent_signal();
-  SSD1306.sent_screen(0);
-  delay(3000);
+    case PULSE:
+      time = (duration == SHORT) ? 60 : 500;
+      send_recording_start_signal(1);
+      SSD1306.pre_record_screen(1);
+      delay(2000);
+      recordPulseRate(time);
 
-  time = (duration == SHORT) ? 60 : 500;
-  send_recording_start_signal(1);
-  SSD1306.pre_record_screen(1);
-  delay(2000);
-  recordPulseRate(time);
+      delay(2000);
+      send_sent_signal();
+      SSD1306.sent_screen(1);
+      delay(5000);
+      break;
 
-  delay(2000);
-  send_sent_signal();
-  SSD1306.sent_screen(1);
-  delay(5000);
+    case HEART:
+      time = (duration == SHORT) ? 10 : 120;
+      send_recording_start_signal(2);
+      SSD1306.pre_record_screen(2);
+      wait_for_press();
+      delay(2000);
+      recordHeartBeat(time);
 
-  while (!done)
-    ;
-  done = false;
+      delay(2000);
+      send_sent_signal();
+      SSD1306.sent_screen(2);
+      delay(3000);
+      break;
 
-  time = (duration == SHORT) ? 10 : 120;
-  send_recording_start_signal(2);
-  SSD1306.pre_record_screen(2);
-  wait_for_press();
-  delay(2000);
-  recordHeartBeat(time);
+    case BP:
+      send_recording_start_signal(3);
+      SSD1306.pre_record_screen(3);
+      wait_for_press();
+      delay(2000);
+      recordBloodPressure();
 
-  delay(2000);
-  send_sent_signal();
-  SSD1306.sent_screen(2);
-  delay(3000);
+      delay(2000);
+      send_sent_signal();
+      SSD1306.sent_screen(3);
+      delay(3000);
+      break;
+  }
 
   while (!done)
     ;
   done = false;
   
-  if(bp) {
-  send_recording_start_signal(3);
-  SSD1306.pre_record_screen(3);
-  wait_for_press();
-  delay(2000);
-  recordBloodPressure();
-
-  delay(2000);
-  send_sent_signal();
-  SSD1306.sent_screen(3);
-  delay(3000);
-
-  while (!done)
-    ;
-  done = false;
-  }
-
   SSD1306.finished_record_screen();
   finished = true;
 }
@@ -249,7 +257,7 @@ void recordHeartBeat(int secs)
   {
     INMP441.read(i2sReadBuff, &bytesRead);
     SerialBT.write((uint8_t *)i2sReadBuff, bytesRead);
-    Serial.flush();
+    //SerialBT.flush();
     progress = (float)currRecordSize * 100 / totRecordSize;
     SSD1306.record_screen(progress);
     currRecordSize += bytesRead;
@@ -421,29 +429,53 @@ void btCallback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 void received_data_handler(String message)
 {
   Serial.println(message);
-  if (message == "START,Short\n")
+  if (message == "START,Short,Temp\n")
   {
     record = true;
     duration = SHORT;
-    bp = false;
+    parameter = TEMP;
+  }
+  else if (message == "START,Short,Pulse\n")
+  {
+    record = true;
+    duration = SHORT;
+    parameter = PULSE;
+  }
+  else if (message == "START,Short,Heart\n")
+  {
+    record = true;
+    duration = SHORT;
+    parameter = HEART;
   }
   else if (message == "START,Short,BP\n")
   {
     record = true;
     duration = SHORT;
-    bp = true;
+    parameter = BP;
   }
-  else if (message == "START,Long\n")
+  else if (message == "START,Long,Temp\n")
   {
     record = true;
     duration = LONG;
-    bp = false;
+    parameter = TEMP;
+  }
+  else if (message == "START,Long,Pulse\n")
+  {
+    record = true;
+    duration = LONG;
+    parameter = PULSE;
+  }
+  else if (message == "START,Long,Heart\n")
+  {
+    record = true;
+    duration = LONG;
+    parameter = HEART;
   }
   else if (message == "START,Long,BP\n")
   {
     record = true;
     duration = LONG;
-    bp = true;
+    parameter = BP;
   }
   else if (message == "SUCCESS\n")
   {
@@ -476,7 +508,6 @@ void send_recording_start_signal(int param)
 
 void send_sent_signal()
 {
-
   char buff[10];
   sprintf(buff, "SENT\n");
   SerialBT.write((uint8_t *)buff, 5);

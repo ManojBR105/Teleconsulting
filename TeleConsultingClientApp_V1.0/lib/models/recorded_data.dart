@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:client_app/models/shared.dart';
 import 'package:client_app/models/firebase.dart';
-import 'package:client_app/screens/pulse_data_screen.dart';
+import 'package:client_app/models/screens/pulse_data_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 

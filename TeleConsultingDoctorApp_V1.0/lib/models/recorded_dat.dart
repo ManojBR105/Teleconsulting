@@ -6,6 +6,10 @@ import 'package:doctor_app/screens/pulse_data_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 
+import '../utils/ml_classifier.dart';
+
+//import 'ml_classifier.dart';
+
 class RecordedData extends StatefulWidget {
   final String uid;
   final String recId;
@@ -20,6 +24,14 @@ class _RecordedDataState extends State<RecordedData> {
   final String recId;
   final formkey = GlobalKey<FormState>();
 
+  // final isRecording = ValueNotifier<bool>(false);
+  // Stream<Map<dynamic, dynamic>> result;
+  // final String model = 'assets/model.tflite';
+  // final String label = 'assets/label.txt';
+  // final String inputType = 'rawAudio';
+  // final int sampleRate = 16000;
+  // final int audioLength = 160000;
+
   _RecordedDataState(this.uid, this.recId);
 
   bool loading = true;
@@ -32,7 +44,29 @@ class _RecordedDataState extends State<RecordedData> {
   void initState() {
     super.initState();
     _getData();
+    // TfliteAudio.loadModel(
+    //   // numThreads: this.numThreads,
+    //   // isAsset: this.isAsset,
+    //   // outputRawScores: outputRawScores,
+    //   inputType: inputType,
+    //   model: model,
+    //   label: label,
+    // );
+    // TfliteAudio.setSpectrogramParameters(nMFCC: 40, shouldTranspose: true);
   }
+
+  // void getResult(audioPath) {
+  //   result = TfliteAudio.startFileRecognition(
+  //     audioDirectory: audioPath,
+  //     sampleRate: sampleRate,
+  //     audioLength: audioLength,
+  //   );
+
+  //   result
+  //       .listen((event) =>
+  //           log("Recognition Result: " + event["recognitionResult"].toString()))
+  //       .onDone(() => isRecording.value = false);
+  // }
 
   @override
   void dispose() async {
@@ -118,6 +152,18 @@ class _RecordedDataState extends State<RecordedData> {
                   OpenFile.open(heartPath);
                 })
               ]),
+              ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all(Colors.indigoAccent[700]),
+                    foregroundColor: MaterialStateProperty.all(Colors.white),
+                  ),
+                  onPressed: () async {
+                    // getResult(heartPath);
+                    List<double> result = await MLClassifier(heartPath);
+                    showPopUpResult(result);
+                  },
+                  child: Text("Try ML Heart Beat Audio Classifier")),
               remark != null
                   ? Container(
                       margin: EdgeInsets.all(
@@ -145,8 +191,8 @@ class _RecordedDataState extends State<RecordedData> {
       {String subData, Function onTap}) {
     return Container(
       margin: EdgeInsets.all(MediaQuery.of(context).size.width * 0.0125),
-      width: MediaQuery.of(context).size.width * 0.45,
-      height: MediaQuery.of(context).size.height * 0.35,
+      width: MediaQuery.of(context).size.width * 0.46,
+      height: MediaQuery.of(context).size.height * 0.3,
       child: GestureDetector(
         onTap: onTap,
         child: Card(
@@ -159,7 +205,7 @@ class _RecordedDataState extends State<RecordedData> {
             children: [
               Text(
                 tittle,
-                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold),
               ),
               Image(
                 image: image,
@@ -226,6 +272,62 @@ class _RecordedDataState extends State<RecordedData> {
                 ),
               )
             ],
+          );
+        });
+  }
+
+  showPopUpResult(List<double> result) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Ml Classifier Result",
+                    style: TextStyle(
+                        color: Colors.indigoAccent[700],
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(
+                      Icons.cancel,
+                      size: 35.0,
+                    ),
+                  )
+                ]),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "Artifact: ${(result[0] * 100).round()}%",
+                  style: TextStyle(
+                      color: Colors.redAccent[700],
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
+                ),
+                Text("Murmur: ${(result[1] * 100).round()}%",
+                    style: TextStyle(
+                        color: Colors.amberAccent[700],
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold)),
+                Text("Normal: ${(result[2] * 100).round()}%",
+                    style: TextStyle(
+                        color: Colors.greenAccent[700],
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold)),
+                Text(
+                  "Note: \nIf the audio is noisy the results might not be accurate.",
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                )
+              ],
+            ),
           );
         });
   }

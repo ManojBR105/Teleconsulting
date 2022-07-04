@@ -155,7 +155,7 @@ class DatabaseService {
 
     var bpData;
 
-    if (data["Systolic Pressure"] != null) {
+    if (data["Systolic Pressure"] != "null") {
       double systolic = double.parse(data["Systolic Pressure"]);
       double diastolic = double.parse(data["Diastolic Pressure"]);
       double pulse = double.parse(data["Pulse"]);

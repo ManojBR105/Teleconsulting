@@ -1,6 +1,6 @@
 import 'package:client_app/models/firebase.dart';
 import 'package:flutter/material.dart';
-import 'package:client_app/screens/wrapper.dart';
+import 'package:client_app/models/screens/wrapper.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 

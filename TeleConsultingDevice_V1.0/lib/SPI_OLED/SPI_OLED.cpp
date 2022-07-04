@@ -2,7 +2,7 @@
 
 SPI_OLED::SPI_OLED(int res, int dc, int cs)
 {
-    display = new U8G2_SSD1306_128X64_NONAME_F_4W_HW_SPI(U8G2_R0, cs, dc, res);
+    display = new U8G2_SSD1306_128X64_NONAME_F_4W_HW_SPI(U8G2_R2, cs, dc, res);
 }
 
 SPI_OLED::~SPI_OLED()
