@@ -158,9 +158,10 @@ void BP_MONITOR::takeReadingsUpto(int mmHg)
             prev = micros();
             uint32_t data = readPressure();
             p[i] = data;
+            Serial.println(data);
             if (i)
                 dp[i] = p[i] - p[i - 1];
-                Serial.println(dp[i]);
+                //Serial.println(dp[i]);
             if (data <= set)
                 break;
             i++;

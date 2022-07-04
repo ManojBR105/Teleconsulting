@@ -36,15 +36,6 @@ class PatientTile extends StatelessWidget {
         child: Column(
           children: [
             ListTile(
-                tileColor: Colors.indigoAccent[700],
-                title: Text(
-                  "Patients",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                )),
-            Divider(),
-            ListTile(
               onTap: () {
                 Navigator.push(
                     context,

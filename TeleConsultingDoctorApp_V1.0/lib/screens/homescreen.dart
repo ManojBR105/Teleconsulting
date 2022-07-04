@@ -55,6 +55,15 @@ class _HomeScrnState extends State<HomeScrn> {
         body: Column(
           children: [
             _userDetailsPage(),
+            Divider(),
+            ListTile(
+                tileColor: Colors.indigoAccent[700],
+                title: Text(
+                  "Patients",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                )),
             Expanded(child: PatientList()),
           ],
         ),
@@ -95,16 +104,22 @@ class _HomeScrnState extends State<HomeScrn> {
                               : "loading",
                       style: TextStyle(fontSize: 25.0, fontFamily: 'Rubik'),
                     ),
-                    Text(
-                      loading
-                          ? "email@domain.com"
-                          : userData != null
-                              ? userData["email"].toString()
-                              : "loading",
-                      style: TextStyle(
-                          fontSize: 15.0,
-                          color: Colors.grey[600],
-                          letterSpacing: 1.2),
+                    SizedBox(
+                      width: 200,
+                      child: Text(
+                        loading
+                            ? "email@domain.com"
+                            : userData != null
+                                ? userData["email"].toString()
+                                : "loading",
+                        style: TextStyle(
+                            fontSize: 15.0,
+                            color: Colors.grey[600],
+                            letterSpacing: 1.2),
+                        maxLines: 2,
+                        softWrap: true,
+                        textWidthBasis: TextWidthBasis.parent,
+                      ),
                     ),
                     SizedBox(height: 10.0),
                   ],

@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:client_app/models/firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'package:flutter_switch/flutter_switch.dart';
 import 'package:toast/toast.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:path_provider/path_provider.dart';
@@ -42,16 +41,18 @@ class _RecorderWidgetState extends State<RecorderWidget> {
   bool loaded = false;
 
   String _recordDuration;
+  String _recordParam;
   List<String> _durationChoices = ["Short", "Long"];
+  List<String> _parameterChoices = ["Temp", "Pulse", "Heart", "BP"];
   double _ambientTempF;
   double _objectTempF;
   double _systolic;
   double _diastolic;
   double _pulse;
   bool _isTempRecorded = false;
-  bool _isReadyToUpload = false;
+  bool _isPulseRecorded = false;
+  bool _isHeartRecorded = false;
   bool _isBpRecorded = false;
-  bool _recordBP = false;
 
   DeviceState _deviceState = DeviceState.IDLE;
 
@@ -75,7 +76,7 @@ class _RecorderWidgetState extends State<RecorderWidget> {
 
   _onDataReceived(Uint8List data) async {
     if (data != null && data.length > 0) {
-      print(String.fromCharCodes(data));
+      // print(String.fromCharCodes(data));
       print(data.length);
       await _dataHandler(data);
     }
@@ -113,7 +114,6 @@ class _RecorderWidgetState extends State<RecorderWidget> {
         break;
       case "DONE\n":
         setState(() {
-          _isReadyToUpload = true;
           _deviceState = DeviceState.IDLE;
         });
         break;
@@ -143,12 +143,14 @@ class _RecorderWidgetState extends State<RecorderWidget> {
           base64 += String.fromCharCodes(_chunks[i]);
         Uint8List _bytes = Base64Util.base64Decoder(base64);
         myFile.writeAsBytesSync(_bytes, mode: FileMode.append, flush: true);
+        _isPulseRecorded = true;
       } else {
         myFile.writeAsBytesSync(_chunks[0].sublist(9),
             mode: FileMode.append, flush: true);
         for (int i = 1; i < _chunks.length; i++)
           myFile.writeAsBytesSync(_chunks[i],
               mode: FileMode.append, flush: true);
+        _isHeartRecorded = true;
       }
       _listofFles();
       setState(() {
@@ -171,11 +173,16 @@ class _RecorderWidgetState extends State<RecorderWidget> {
       _systolic = double.parse(data.split(",")[0]);
       _diastolic = double.parse(data.split(",")[1]);
       _pulse = double.parse(data.split(",")[2]);
-      _isBpRecorded = true;
       setState(() {
         _chunks.clear();
         totLength = 0;
       });
+      if (_systolic == 0 || _diastolic == 0 || _systolic - _diastolic < 20)
+        Toast.show(
+            "The BP recording was not successful, please record again", context,
+            duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+      else
+        _isBpRecorded = true;
     } else {
       Toast.show("Something went wrong while recieving the file", context,
           duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
@@ -231,15 +238,9 @@ class _RecorderWidgetState extends State<RecorderWidget> {
 
   _sendRecordSignal() async {
     try {
-      if (_recordBP) {
-        _connection.output
-            .add(Uint8List.fromList("START,$_recordDuration,BP\n".codeUnits));
-        await _connection.output.allSent;
-      } else {
-        _connection.output
-            .add(Uint8List.fromList("START,$_recordDuration\n".codeUnits));
-        await _connection.output.allSent;
-      }
+      _connection.output.add(Uint8List.fromList(
+          "START,$_recordDuration,$_recordParam\n".codeUnits));
+      await _connection.output.allSent;
     } catch (e) {
       Toast.show("Something went Wrong, Couldn't Send Signal", context,
           duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
@@ -281,9 +282,10 @@ class _RecorderWidgetState extends State<RecorderWidget> {
         File(await _path + "/Heart_Beat.wav"),
         context, () async {
       await _deletePrevFiles();
-      _isReadyToUpload = false;
+      _isPulseRecorded = false;
       _isTempRecorded = false;
       _isBpRecorded = false;
+      _isHeartRecorded = false;
       await _listofFles();
     });
   }
@@ -297,43 +299,10 @@ class _RecorderWidgetState extends State<RecorderWidget> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                "Select Recording Duration",
+                "Select Recording Duration and Parameter",
                 style: TextStyle(color: Colors.lightBlue[700], fontSize: 18.0),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Measure BP ",
-                    style: TextStyle(fontSize: 16.0),
-                  ),
-                  FlutterSwitch(
-                    activeColor: Colors.blueGrey[100],
-                    inactiveColor: Colors.blueGrey[100],
-                    activeTextColor: Colors.lightBlue[700],
-                    activeToggleColor: Colors.lightBlue[700],
-                    width: 80.0,
-                    height: 30.0,
-                    valueFontSize: 15.0,
-                    toggleSize: 20.0,
-                    value: _recordBP,
-                    borderRadius: 20.0,
-                    padding: 5.0,
-                    showOnOff: true,
-                    onToggle: (val) {
-                      if (_deviceState == DeviceState.IDLE) {
-                        _recordBP = val;
-                        setState(() {});
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-            Divider(),
             Form(
               child: Column(
                 children: [
@@ -353,6 +322,26 @@ class _RecorderWidgetState extends State<RecorderWidget> {
                       onChanged: (value) {
                         setState(() {
                           _recordDuration = value;
+                        });
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: DropdownButtonFormField(
+                      value: _recordParam,
+                      items: _parameterChoices
+                          .map<DropdownMenuItem<String>>(
+                            (String label) => DropdownMenuItem<String>(
+                              child: Text(label),
+                              value: label,
+                            ),
+                          )
+                          .toList(),
+                      hint: Text("Recording Parameter"),
+                      onChanged: (value) {
+                        setState(() {
+                          _recordParam = value;
                         });
                       },
                     ),
@@ -471,7 +460,7 @@ class _RecorderWidgetState extends State<RecorderWidget> {
   }
 
   Widget _options() {
-    return _isReadyToUpload
+    return (_isHeartRecorded && _isPulseRecorded && _isTempRecorded)
         ? TextButton.icon(
             style: ButtonStyle(
                 backgroundColor:

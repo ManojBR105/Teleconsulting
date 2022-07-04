@@ -31,6 +31,7 @@ class Authenticate {
   //register with email and password
   Future<MyUser> registerWithEmailAndPassword(String email, String password,
       String username, BuildContext context) async {
+    print(email);
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
@@ -223,8 +224,7 @@ class DatabaseService {
         "${ambTemp.toStringAsFixed(2)},${bodTemp.toStringAsFixed(2)}";
 
     var bpData;
-
-    if (data["Systolic Pressure"] != null) {
+    if (data["Systolic Pressure"] != "null") {
       double systolic = double.parse(data["Systolic Pressure"]);
       double diastolic = double.parse(data["Diastolic Pressure"]);
       double pulse = double.parse(data["Pulse"]);
